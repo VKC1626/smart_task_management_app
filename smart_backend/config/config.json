@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "appuser",
+    "password": "smartapp",
+    "database": "smartapp",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "appuser",
+    "password": "smartapp",
+    "database": "smartapp",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "appuser",
+    "password": "smartapp",
+    "database": "smartapp",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
