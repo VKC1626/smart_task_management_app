@@ -5,8 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 // In production, this should come from localStorage or Context
 const token =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywidXNlcm5hbWUiOiJ0ZXN0dXNlciIsImVtYWlsIjoidGVzdHVzZXJAZXhhbXBsZS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc0Nzg5MDA1OCwiZXhwIjoxNzQ4NDk0ODU4fQ.kVgISk1X4IpQzOD0zNw9kVPickyjLw6oTf0KIupIJxc";
-
+  "place your token here"
 // Decode token payload
 const getUserIdFromToken = (token) => {
   try {
