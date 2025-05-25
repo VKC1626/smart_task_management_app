@@ -1,0 +1,176 @@
+.login_form {
+  background-color: lightblue;
+  max-width: 500px;
+  margin: 100px 500px 75px 500px;
+  padding: 50px;
+  border-left: 1px solid whitesmoke;
+  border-right: 1px solid whitesmoke;
+  text-align: justify;
+  text-justify: distribute-all-lines;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.main_layout {
+  background-color: whitesmoke;
+}
+
+.task-list-container {
+  overflow-x: auto;
+}
+
+.task-table {
+  margin-top: 1rem;
+}
+
+.table-header {
+  background-color: #f8f9fa;
+}
+
+.task-row:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.task-title {
+  font-weight: 500;
+}
+
+.task-actions .dropdown-toggle {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.task-actions .dropdown-menu {
+  min-width: 200px;
+}
+
+/* Register.css */
+
+.register-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #f8f9fa;
+  /* Light grey background */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.register-container h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #343a40;
+  /* Dark grey */
+}
+
+.form-control {
+  margin-bottom: 15px;
+  height: 45px;
+  font-size: 1rem;
+}
+
+.btn-register {
+  width: 100%;
+  background-color: #007bff;
+  /* Bootstrap primary blue */
+  color: white;
+  font-weight: 600;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-register:hover {
+  background-color: #0056b3;
+  color: white;
+  cursor: pointer;
+}
+
+.register-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #6c757d;
+  /* Secondary text color */
+}
+
+.register-footer a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.register-footer a:hover {
+  text-decoration: underline;
+}
+
+.task-form-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.task-form-title {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.task-form-group {
+  margin-bottom: 20px;
+}
+
+.task-form-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+  color: #444;
+}
+
+.task-form-input {
+  width: 100%;
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s ease;
+}
+
+.task-form-input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.task-form-button-container {
+  text-align: center;
+  margin-top: 25px;
+}
+
+.task-form-button {
+  padding: 10px 30px;
+  font-size: 16px;
+  border-radius: 8px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.task-form-button:hover {
+  background-color: #0056b3;
+}
+
+.task-table th,
+.task-table td {
+  vertical-align: middle;
+}
+
+.task-table .badge {
+  font-size: 0.9rem;
+  cursor: pointer;
+}
