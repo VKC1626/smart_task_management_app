@@ -19,7 +19,7 @@ const TaskForm = ({ initialData = null }) => {
       setTitle(initialData.title || "");
       setDescription(initialData.description || "");
 
-      // ✅ Accept dueDate or due_date
+      // Accept dueDate or due_date
       const rawDueDate = initialData.dueDate || initialData.due_date;
       setDueDate(rawDueDate ? rawDueDate.split("T")[0] : "");
 
@@ -40,7 +40,7 @@ const TaskForm = ({ initialData = null }) => {
     const taskData = {
       title,
       description,
-      dueDate: dueDate ? new Date(dueDate).toISOString() : null, // ✅ correct
+      dueDate: dueDate ? new Date(dueDate).toISOString() : null, 
       category,
       status,
       priority,

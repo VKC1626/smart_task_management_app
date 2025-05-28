@@ -41,7 +41,7 @@ const Dashboard = () => {
   ]);
 
   const [tasks, setTasks] = useState([]);
-  const [editTask, setEditTask] = useState(null); // ✅ track task to edit
+  const [editTask, setEditTask] = useState(null); //  track task to edit
   const [showForm, setShowForm] = useState(false); // for toggling form
 
   const [error, setError] = useState("");
@@ -194,7 +194,7 @@ const Dashboard = () => {
       date.setDate(date.getDate() - i);
       return {
         date: date.toISOString().slice(0, 10),
-        count: Math.floor(Math.random() * 3), // Replace with real data if needed
+        count: Math.floor(Math.random() * 3),
       };
     }).reverse();
 
