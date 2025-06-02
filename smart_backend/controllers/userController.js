@@ -1,15 +1,15 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-require("dotenv").config(); // Load .env variables at the top
+require("dotenv").config();
 
 const { User } = require("../models");
 
-const JWT_SECRET = process.env.JWT_SECRET; // Correctly read from env
+const JWT_SECRET = process.env.JWT_SECRET;
 
-console.log("JWT_SECRET:", JWT_SECRET); // Optional: Debug secret in dev ONLY
+console.log("JWT_SECRET:", JWT_SECRET);
 
-// @desc    Register a new user
-// @route   POST /api/users/register
+//Register a new user
+
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -35,8 +35,8 @@ const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/users/login
+//  Login user
+//  POST /api/users/login
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -44,6 +44,11 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
+    }
+    // console.log("Checking access_on:", user.access_on);
+    if (!user.access_on) {
+      // console.log("Blocked login due to disabled account");
+      return res.status(403).json({ message: "Account is disabled" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -64,8 +69,8 @@ const loginUser = async (req, res) => {
   }
 };
 
-// @desc    Get user profile
-// @route   GET /api/users/profile
+//  Get user profile
+//  GET /api/users/profile
 const getUserProfile = async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id); // req.user set by auth middleware

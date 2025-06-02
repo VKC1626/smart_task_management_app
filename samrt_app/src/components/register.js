@@ -30,7 +30,7 @@ const Register = () => {
 
       if (token) {
         localStorage.setItem("token", token);
-        navigate("/dashboard");
+        navigate("/login");
       }
     } catch (err) {
       setError("Registration failed");

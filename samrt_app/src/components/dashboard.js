@@ -31,15 +31,7 @@ ChartJS.register(
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [data, setdata] = useState([
-    {
-      name: "",
-      id: "",
-      priority: "",
-      discription: "",
-    },
-  ]);
-
+ 
   const [tasks, setTasks] = useState([]);
   const [editTask, setEditTask] = useState(null); //  track task to edit
   const [showForm, setShowForm] = useState(false); // for toggling form
@@ -60,7 +52,7 @@ const Dashboard = () => {
   };
 
   const handleDelete = async (taskId) => {
-    debugger;
+    
     try {
       await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
         headers: {

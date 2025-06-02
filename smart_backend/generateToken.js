@@ -9,6 +9,6 @@ const payload = {
 
 const token = jwt.sign(
   payload,
-  "myjwtkeysecret", // Replace with your process.env.JWT_SECRET in production
+  "myjwtkeysecret", 
   { expiresIn: "7d" }
 );

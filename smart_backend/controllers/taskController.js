@@ -51,7 +51,7 @@ const updateTask = async (req, res) => {
     const updateData = req.body;
     const userId = req.user.id;
 
-    // Convert snake_case to camelCase for due date if needed
+    // Convert snake_case to camelCase for due date
     if (updateData.due_date) {
       updateData.dueDate = updateData.due_date;
       delete updateData.due_date;
@@ -122,10 +122,10 @@ const getTaskStats = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized: no user ID" });
     }
 
-    // Your logic to calculate stats here, for example:
+  
     const tasks = await Task.findAll({ where: { userId } });
 
-    // Just a placeholder example for stats
+    
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter(
       (task) => task.status === "completed"

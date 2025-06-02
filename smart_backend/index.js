@@ -1,8 +1,8 @@
-require("dotenv").config(); // must be first
+require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 const SECRET_KEY = process.env.JWT_SECRET;
-console.log("JWT_SECRET:", SECRET_KEY); // should log the secret key
+console.log("JWT_SECRET:", SECRET_KEY);
 
 const express = require("express");
 const cors = require("cors");
@@ -12,7 +12,7 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Use CORS with proper config (only once)
+// Use CORS with proper config 
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -30,7 +30,7 @@ const userRoutes = require("./routes/userRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const authRoutes = require("./routes/authRoutes");
 
-// Use routes (order matters)
+// Use routes 
 app.use("/api", dashboardRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
