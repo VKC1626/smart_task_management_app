@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Card, Spinner, Alert } from "react-bootstrap";
 import { Bar, Pie } from "react-chartjs-2";
 import { CSVLink } from "react-csv";
 import * as XLSX from "xlsx";
@@ -31,13 +31,15 @@ ChartJS.register(
 
 const Dashboard = () => {
   const navigate = useNavigate();
- 
+
   const [tasks, setTasks] = useState([]);
-  const [editTask, setEditTask] = useState(null); //  track task to edit
-  const [showForm, setShowForm] = useState(false); // for toggling form
+  const [editTask, setEditTask] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportMessage, setExportMessage] = useState(null);
   const [stats, setStats] = useState({
     todayTasks: 0,
     completedLast7Days: [],
@@ -52,23 +54,23 @@ const Dashboard = () => {
   };
 
   const handleDelete = async (taskId) => {
-    
     try {
       await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+      const updatedTasks = tasks.filter((task) => task.id !== taskId);
+      setTasks(updatedTasks);
+      setStats(calculateStats(updatedTasks));
     } catch (err) {
       console.error("Delete failed:", err.response?.data || err.message);
       setError("Failed to delete task. Please try again.");
     }
   };
+
   const onUpdate = async (taskId, updatedData) => {
     try {
-      const token = localStorage.getItem("token");
-
       const payload = {
         ...updatedData,
         due_date: updatedData.dueDate
@@ -119,11 +121,13 @@ const Dashboard = () => {
         priority: normalizePriority(updatedTask.priority),
       };
 
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
+      setTasks((prevTasks) => {
+        const updatedTasks = prevTasks.map((task) =>
           String(task.id) === String(normalizedTask.id) ? normalizedTask : task
-        )
-      );
+        );
+        setStats(calculateStats(updatedTasks)); // Recalculating stats after editing
+        return updatedTasks;
+      });
 
       setShowForm(false);
       setEditTask(null);
@@ -138,7 +142,6 @@ const Dashboard = () => {
     navigate("/taskform");
   };
 
-  // fetchTasks wrapped with useCallback to stabilize the function reference
   const fetchTasks = useCallback(async () => {
     if (!token) {
       setError("No token found. Please login.");
@@ -172,100 +175,136 @@ const Dashboard = () => {
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+const calculateStats = (taskList) => {
+  const todayStr = new Date().toISOString().slice(0, 10);
 
-  const calculateStats = (taskList) => {
-    const todayDateStr = new Date().toISOString().split("T")[0];
-    const todayTasks = taskList.filter((t) => {
-      if (!t.dueDate) return false;
-      const taskDueDate = new Date(t.dueDate).toISOString().split("T")[0];
-      return taskDueDate === todayDateStr && t.status !== "completed";
+  // ✅ Count of tasks due today (excluding completed ones)
+  const todayTasks = taskList.filter((task) => {
+    if (!task.dueDate || task.status === "completed") return false;
+    const taskDateStr = new Date(task.dueDate).toISOString().slice(0, 10);
+    return taskDateStr === todayStr;
+  }).length;
+
+  // ✅ Completed tasks in the last 7 days
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().slice(0, 10);
+
+    const count = taskList.filter((task) => {
+      if (!task.dueDate || task.status !== "completed") return false;
+      const taskDateStr = new Date(task.dueDate).toISOString().slice(0, 10);
+      return taskDateStr === dateStr;
     }).length;
 
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      return {
-        date: date.toISOString().slice(0, 10),
-        count: Math.floor(Math.random() * 3),
-      };
-    }).reverse();
+    return { date: dateStr, count };
+  }).reverse();
 
-    const categoryMap = {};
-    for (const task of taskList) {
-      const cat = task.category || "Uncategorized";
-      categoryMap[cat] = (categoryMap[cat] || 0) + 1;
-    }
+  // ✅ Task count per category
+  const categoryMap = {};
+  for (const task of taskList) {
+    const cat = task.category || "Uncategorized";
+    categoryMap[cat] = (categoryMap[cat] || 0) + 1;
+  }
 
-    return {
-      todayTasks,
-      completedLast7Days: last7Days,
-      categories: Object.entries(categoryMap).map(([category, count]) => ({
-        category,
-        count,
-      })),
-    };
+  return {
+    todayTasks,
+    completedLast7Days: last7Days,
+    categories: Object.entries(categoryMap).map(([category, count]) => ({
+      category,
+      count,
+    })),
   };
+};
+
 
   const exportToPDF = (tasks) => {
-    const doc = new jsPDF();
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("Task Management Report", 105, 15, { align: "center" });
+    if (!window.confirm("Do you want to download the tasks as PDF?")) return;
 
-    doc.setFont("helvetica", "medium");
-    doc.setFontSize(12);
-    doc.text(`Generated on ${new Date().toLocaleDateString()}`, 105, 25, {
-      align: "center",
-    });
+    setExportLoading(true);
+    setExportMessage(null);
 
-    const headers = [
-      ["Title", "Description", "Category", "Due Date", "Status", "Priority"],
-    ];
-    const body = tasks.map((task) => [
-      task.title,
-      task.description,
-      task.category,
-      task.dueDate,
-      task.status,
-      task.priority,
-    ]);
+    try {
+      const doc = new jsPDF();
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("Task Management Report", 105, 15, { align: "center" });
 
-    autoTable(doc, {
-      head: headers,
-      body: body,
-      startY: 35,
-      theme: "grid",
-      styles: { fontSize: 10, cellPadding: 2 },
-      headStyles: {
-        fillColor: [41, 128, 185],
-        textColor: 255,
-      },
-    });
+      doc.setFont("helvetica", "medium");
+      doc.setFontSize(12);
+      doc.text(`Generated on ${new Date().toLocaleDateString()}`, 105, 25, {
+        align: "center",
+      });
 
-    const totalPages = doc.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i++) {
-      doc.setPage(i);
-      doc.setFontSize(10);
-      doc.text(`Page ${i} of ${totalPages}`, 200, 285, { align: "right" });
+      const headers = [
+        ["Title", "Description", "Category", "Due Date", "Status", "Priority"],
+      ];
+      const body = tasks.map((task) => [
+        task.title,
+        task.description,
+        task.category,
+        task.dueDate,
+        task.status,
+        task.priority,
+      ]);
+
+      autoTable(doc, {
+        head: headers,
+        body: body,
+        startY: 35,
+        theme: "grid",
+        styles: { fontSize: 10, cellPadding: 2 },
+        headStyles: {
+          fillColor: [41, 128, 185],
+          textColor: 255,
+        },
+      });
+
+      const totalPages = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(`Page ${i} of ${totalPages}`, 200, 285, { align: "right" });
+      }
+
+      doc.save(`tasks_${new Date().toISOString().slice(0, 10)}.pdf`);
+      setExportMessage("PDF exported successfully.");
+    } catch (err) {
+      setExportMessage("Failed to export PDF.");
+      console.error(err);
+    } finally {
+      setExportLoading(false);
     }
-
-    doc.save(`tasks_${new Date().toISOString().slice(0, 10)}.pdf`);
   };
 
   const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(
-      tasks.map((task) => ({
-        Title: task.title,
-        Description: task.description,
-        Category: task.category,
-        "Due Date": task.dueDate,
-        Status: task.status,
-        Priority: task.priority,
-      }))
-    );
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Tasks");
-    XLSX.writeFile(wb, "tasks.xlsx");
+    if (!window.confirm("Do you want to download the tasks as Excel?")) return;
+
+    setExportLoading(true);
+    setExportMessage(null);
+
+    try {
+      const ws = XLSX.utils.json_to_sheet(
+        tasks.map((task) => ({
+          Title: task.title,
+          Description: task.description,
+          Category: task.category,
+          "Due Date": task.dueDate,
+          Status: task.status,
+          Priority: task.priority,
+        }))
+      );
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Tasks");
+      XLSX.writeFile(wb, "tasks.xlsx");
+
+      setExportMessage("Excel file exported successfully.");
+    } catch (err) {
+      setExportMessage("Failed to export Excel file.");
+      console.error(err);
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   if (error) {
@@ -365,6 +404,15 @@ const Dashboard = () => {
                 </button>
               </div>
 
+              {exportMessage && (
+                <Alert
+                  variant="info"
+                  onClose={() => setExportMessage(null)}
+                  dismissible>
+                  {exportMessage}
+                </Alert>
+              )}
+
               {tasks.length === 0 ? (
                 <div className="text-center my-4">
                   <p className="text-muted mb-3">
@@ -388,14 +436,14 @@ const Dashboard = () => {
                     <button
                       onClick={exportToExcel}
                       className="btn btn-outline-secondary me-2"
-                      disabled={tasks.length === 0}>
-                      Export Excel
+                      disabled={exportLoading}>
+                      {exportLoading ? "Exporting..." : "Export Excel"}
                     </button>
                     <button
                       onClick={() => exportToPDF(tasks)}
                       className="btn btn-outline-secondary"
-                      disabled={tasks.length === 0}>
-                      Export PDF
+                      disabled={exportLoading}>
+                      {exportLoading ? "Exporting..." : "Export PDF"}
                     </button>
                   </div>
                   <TaskList
